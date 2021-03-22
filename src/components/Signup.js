@@ -3,6 +3,7 @@ import { Form, Button, Card, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import firebase from "firebase";
+
 export default function Signup() {
 	const emailRef = useRef();
 	const passwordRef = useRef();
@@ -25,7 +26,7 @@ export default function Signup() {
 				// The signed-in user info.
 				var user = result.user;
 				setTimeout(function () {
-					history.push("/dashboard");
+					history.push("/navigate");
 				}, 2000);
 				// ...
 			})

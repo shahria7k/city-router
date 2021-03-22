@@ -10,15 +10,15 @@ import ForgotPassword from "./ForgotPassword";
 import UpdateProfile from "./UpdateProfile";
 import Home from "./Home";
 import Navigate from "./Navigate";
-
+import Header from "./Header";
 function App() {
 	return (
 		<Container fluid="md" style={{ height: "100vh" }}>
 			<Router>
+				<Header />
 				<AuthProvider>
 					<Switch>
 						<Route exact path="/" component={Home} />
-
 						<PrivateRoute path="/dashboard" component={Dashboard} />
 						<PrivateRoute path="/navigate" component={Navigate} />
 						<PrivateRoute path="/update-profile" component={UpdateProfile} />
