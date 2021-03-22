@@ -1,28 +1,76 @@
 import React, { useRef, useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
-import { useAuth } from "./contexts/AuthContext";
-import { Link } from "react-router-dom";
-const Signup = () => {
+import { useAuth } from "../contexts/AuthContext";
+import { Link, useHistory } from "react-router-dom";
+import firebase from "firebase";
+
+export default function Signup() {
 	const emailRef = useRef();
 	const passwordRef = useRef();
-	const passwordConfirmationRef = useRef();
+	const passwordConfirmRef = useRef();
 	const { signup } = useAuth();
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
+	const history = useHistory();
+	function googlePop() {
+		const provider = new firebase.auth.GoogleAuthProvider();
+		firebase
+			.auth()
+			.signInWithPopup(provider)
+			.then((result) => {
+				/** @type {firebase.auth.OAuthCredential} */
+				var credential = result.credential;
+
+				// This gives you a Google Access Token. You can use it to access the Google API.
+				var token = credential.accessToken;
+				// The signed-in user info.
+				var user = result.user;
+				setTimeout(function () {
+					history.push("/navigate");
+				}, 2000);
+				// ...
+			})
+			.catch((error) => {
+				// Handle Errors here.
+				var errorCode = error.code;
+				var errorMessage = error.message;
+				// The email of the user's account used.
+				var email = error.email;
+				// The firebase.auth.AuthCredential type that was used.
+				var credential = error.credential;
+				// ...
+			});
+	}
+	async function gp() {
+		try {
+			setError("");
+			setLoading(true);
+			await googlePop();
+		} catch {
+			setError("Failed to log in");
+		}
+
+		setLoading(false);
+	}
 	async function handleSubmit(e) {
 		e.preventDefault();
-		if (passwordRef.current.value !== passwordConfirmationRef.current.value) {
-			return setError("Password Do not match");
+
+		if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+			return setError("Passwords do not match");
 		}
+
 		try {
 			setError("");
 			setLoading(true);
 			await signup(emailRef.current.value, passwordRef.current.value);
+			history.push("/dashboard");
 		} catch {
-			setError("Failed to create and account");
+			setError("Failed to create an account");
 		}
+
 		setLoading(false);
 	}
+
 	return (
 		<>
 			<Card>
@@ -40,27 +88,25 @@ const Signup = () => {
 						</Form.Group>
 						<Form.Group id="password-confirm">
 							<Form.Label>Password Confirmation</Form.Label>
-							<Form.Control
-								type="password"
-								ref={passwordConfirmationRef}
-								required
-							/>
+							<Form.Control type="password" ref={passwordConfirmRef} required />
 						</Form.Group>
-						<Button disabled={loading} type="submit" className="w-100">
+						<Button disabled={loading} className="w-100" type="submit">
 							Sign Up
 						</Button>
+						<Button
+							disabled={loading}
+							onClick={gp}
+							className="w-100 mt-2"
+							type="submit"
+						>
+							Sign Up With Google
+						</Button>
 					</Form>
-					<div className="w-100 text-center mt-3">Or Sign Up With</div>
-					<div className="d-flex">
-						<Button className="w-100 m-3">Google</Button>
-						<Button className="w-100 m-3">Facebook</Button>
-					</div>
-					<div className="w-100 text-center mt-2">
-						Already have an account? <Link to="/login">Login</Link>
-					</div>
 				</Card.Body>
+				<div className="w-100 text-center mt-2">
+					Already have an account? <Link to="/login">Log In</Link>
+				</div>
 			</Card>
 		</>
 	);
-};
-export default Signup;
+}
